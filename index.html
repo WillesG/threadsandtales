@@ -341,9 +341,24 @@ html,body{height:100%;width:100%;overflow:hidden;position:fixed;font-family:'Sou
 .cbt-toggle{position:relative}
 .cbt-badge{position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:var(--ac)}
 @media(max-width:600px){.cbt-panel{width:300px}}
+.splash{position:fixed;inset:0;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(145deg,#f7f5f0,#ebe7df);transition:opacity .6s ease,visibility .6s ease}
+.splash.hide{opacity:0;visibility:hidden}
+.splash img{width:220px;height:auto;margin-bottom:12px;animation:splashIn .8s ease}
+.splash h1{font-family:'Alegreya',serif;font-size:32px;font-weight:700;color:#2c2c2c;letter-spacing:1px;margin:0;animation:splashIn .8s ease .2s both}
+.splash p{font-family:'Source Sans 3',sans-serif;font-size:14px;font-weight:500;color:#8b5e3c;text-transform:uppercase;letter-spacing:2px;margin-top:4px;animation:splashIn .8s ease .4s both}
+.splash .splash-bar{width:120px;height:3px;background:#e0ddd6;border-radius:3px;margin-top:24px;overflow:hidden;animation:splashIn .8s ease .5s both}
+.splash .splash-fill{height:100%;background:#c49a6c;border-radius:3px;animation:splashLoad 1.8s ease .6s both}
+@keyframes splashIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes splashLoad{from{width:0}to{width:100%}}
 </style>
 </head>
 <body>
+<div class="splash" id="splash">
+  <img src="logo.png" alt="Threads &amp; Tales"/>
+  <h1>Threads &amp; Tales</h1>
+  <p>DM Toolkit &amp; Story Hub</p>
+  <div class="splash-bar"><div class="splash-fill"></div></div>
+</div>
 <div id="root"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -915,7 +930,7 @@ function App(){
   var _cAct=useState(0);var cAct=_cAct[0];var sCAct=_cAct[1];
   var _cFxs=useState([]);var cFxs=_cFxs[0];var sCFxs=_cFxs[1];
 
-  useEffect(function(){var ld=loadAll();var meta=ld.meta||{campaign:"Threads And Tales"};if(meta.campaign==="New Campaign")meta.campaign="Threads And Tales";sSave("meta",meta);sDA({meta:meta,locations:ld.locations||[],npcs:ld.npcs||[],encounters:ld.encounters||[],monsters:ld.monsters||[],factions:ld.factions||[],sessions:ld.sessions||[],party:ld.party||[],storyNodes:ld.storyNodes||[],storyEdges:ld.storyEdges||[]});sLo(false)},[]);
+  useEffect(function(){var ld=loadAll();var meta=ld.meta||{campaign:"Threads And Tales"};if(meta.campaign==="New Campaign")meta.campaign="Threads And Tales";sSave("meta",meta);sDA({meta:meta,locations:ld.locations||[],npcs:ld.npcs||[],encounters:ld.encounters||[],monsters:ld.monsters||[],factions:ld.factions||[],sessions:ld.sessions||[],party:ld.party||[],storyNodes:ld.storyNodes||[],storyEdges:ld.storyEdges||[]});sLo(false);setTimeout(function(){var sp=document.getElementById("splash");if(sp)sp.classList.add("hide");setTimeout(function(){if(sp&&sp.parentNode)sp.parentNode.removeChild(sp)},700)},2000))},[]);
 
   var shT=useCallback(function(m,t){sTo({msg:m,type:t||"ok",key:Date.now()})},[]);
   var nav=useCallback(function(t,id){sSl({type:t,id:id});sVw("content");sSb(false)},[]);

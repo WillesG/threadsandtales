@@ -15,7 +15,8 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;width:100%;overflow:hidden;position:fixed;font-family:'Source Sans 3',sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased}
 #root{height:100%;width:100%}
-.ct-sc,.pty-wrap{background:linear-gradient(170deg,rgba(210,190,150,.15),rgba(180,155,110,.25)),url("parchment.jpg");background-size:cover,800px;background-repeat:no-repeat,repeat;background-color:#d4c9b0}.sidebar{position:fixed;left:0;top:0;bottom:0;width:300px;background:var(--sbg);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s ease;z-index:30}
+.ct-sc,.pty-wrap{background:linear-gradient(170deg,rgba(180,160,130,.5),rgba(160,140,110,.3)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.45' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='.3'/%3E%3C/svg%3E");background-color:#d4c9b0}.app{display:flex;height:100vh;width:100vw;overflow:hidden}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:300px;background:var(--sbg);display:flex;flex-direction:column;overflow:hidden;transition:transform .25s ease;z-index:30}
 .sidebar.closed{transform:translateX(-100%)}
 .sb-bk{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:25}
 .sb-hd{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}

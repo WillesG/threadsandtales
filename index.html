@@ -1264,9 +1264,10 @@ function App(){
       <button className="tb-b" onClick={function(){sSb(!sb)}}><IMenu/></button>
       <button className={"tb-b"+(vw==="content"?" on":"")} onClick={function(){sVw("content")}} title="Content"><IDoc/></button>
       <button className={"tb-b"+(vw==="party"?" on":"")} onClick={function(){sVw("party")}} title="Party"><IPty/></button>
-      <div className="cbt-toggle"><button className={"tb-b"+(cbt?" on":"")} onClick={function(){sCbt(!cbt)}} title="Combat Tracker"><IInit/></button>{cIts.length>0&&!cbt&&<div className="cbt-badge"/>}</div>
       <button className={"tb-b"+(vw==="storyline"?" on":"")} onClick={function(){sVw("storyline")}} title="Storyline"><IGr/></button>
+      <div style={{width:1,height:22,background:"var(--bd)",margin:"0 4px",flexShrink:0}}/>
       <button className={"tb-b"+(vw==="map"?" on":"")} onClick={function(){sVw("map")}} title="Battle Map"><IMap/></button>
+      <div className="cbt-toggle"><button className={"tb-b"+(cbt?" on":"")} onClick={function(){sCbt(!cbt)}} title="Combat Tracker"><IInit/></button>{cIts.length>0&&!cbt&&<div className="cbt-badge"/>}</div>
       <div className="tb-t">{vw==="map"?"Battle Map":vw==="storyline"?"Adventure Storyline":vw==="party"?"Party Dashboard":(sEnt?(sEnt.name||sEnt.title||sEnt.date||"Untitled"):((da.meta&&da.meta.campaign)||"DM Toolkit"))}</div>
       <div style={{display:"flex",gap:6,flexShrink:0}}><button className="btn btn-s" onClick={function(){sSe2(true)}}><IDn/> Export</button><button className="btn btn-s" onClick={function(){sSi(true)}}><IUp/> Import</button></div>
     </div>

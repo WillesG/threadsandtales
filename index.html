@@ -322,7 +322,7 @@ html,body{height:100%;width:100%;overflow:hidden;position:fixed;font-family:'Sou
 .it-hpb>div{height:100%;border-radius:3px}
 .it-hpv{font-size:11px;font-weight:600;color:var(--tx2);white-space:nowrap}
 .it-st{font-size:10px;font-weight:700;color:var(--dg);text-transform:uppercase}
-.it-hp input{width:38px;padding:2px 4px;font-size:12px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-family:inherit;background:#fff}
+.it-hp input{width:46px;padding:2px 4px;font-size:12px;border:1px solid var(--bd);border-radius:4px;text-align:center;font-family:inherit;background:#fff}
 .it-hp button{border:1px solid var(--bd);background:#fff;border-radius:4px;font-size:11px;font-weight:700;padding:2px 6px;cursor:pointer;font-family:inherit}
 .it-hp .dmg{color:var(--dg)}.it-hp .heal{color:var(--ok)}
 .cbt-enc{margin-bottom:8px}
@@ -338,6 +338,15 @@ html,body{height:100%;width:100%;overflow:hidden;position:fixed;font-family:'Sou
 .bm-grp{display:flex;gap:2px;background:var(--inp);border:1px solid var(--bd);border-radius:8px;padding:2px}
 .bm-t{border:none;background:none;padding:5px 8px;border-radius:6px;font-size:12px;font-family:inherit;cursor:pointer;color:var(--tx);white-space:nowrap}
 .bm-t.on{background:var(--ac);color:#fff}
+.bm-tools{display:flex;flex-wrap:wrap;gap:8px 14px;padding:6px 12px 8px;background:var(--card);border-bottom:1px solid var(--bd)}
+.bm-tg{display:flex;align-items:center;gap:3px;flex-wrap:wrap;padding:3px;border-radius:10px}
+.bm-tg .bm-t{display:flex;align-items:center;gap:5px;padding:6px 10px}
+.bm-cap{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);padding:0 6px 0 4px}
+.bm-use{background:var(--inp);border:1px solid var(--bd)}
+.bm-use .bm-t.on{background:var(--ac);color:#fff}
+.bm-draw{background:#fff;border:1px dashed var(--bd)}
+.bm-draw .bm-t.on{background:var(--acbg);color:var(--tx);font-weight:700;box-shadow:inset 0 0 0 2px var(--ac)}
+.bm-sw{width:13px;height:13px;border-radius:3px;border:1px solid rgba(0,0,0,.25);flex-shrink:0;display:inline-block;box-sizing:border-box}
 .bm-tray{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:6px 12px;font-size:12px;color:var(--tx2);min-height:34px}
 .bm-chip{padding:3px 9px;border-radius:14px;border:1px solid var(--bd);background:#fff;font-size:11px;cursor:pointer;font-family:inherit}
 .bm-chip.on{border-color:var(--ac);background:var(--acbg);font-weight:700}
@@ -402,8 +411,8 @@ function sGet(k){try{var r=localStorage.getItem(SK[k]);return r?JSON.parse(r):nu
 function sSave(k,v){try{localStorage.setItem(SK[k],JSON.stringify(v))}catch(e){console.error(e)}}
 function loadAll(){var d={};Object.keys(SK).forEach(function(k){d[k]=sGet(k)});return d}
 function saveAll(d){Object.keys(SK).forEach(function(k){if(d[k]!==undefined)sSave(k,d[k])})}
-function fightInfo(c){c=c||{};var its=c.its||[];var cells=Object.keys((c.map&&c.map.cells)||{}).length;if(!its.length&&!(c.fxs||[]).length&&!cells)return null;return{n:its.length,rnd:c.rnd||1,onMap:its.filter(function(i){return i.pos}).length,fx:(c.fxs||[]).length,cells:cells}}
-function fightTxt(fi){var a=[];if(fi.n)a.push("Round "+fi.rnd+" · "+fi.n+" combatant"+(fi.n===1?"":"s"));if(fi.onMap)a.push(fi.onMap+" on the map");if(fi.fx)a.push(fi.fx+(fi.fx===1?" effect":" effects"));if(fi.cells)a.push("scratch map ("+fi.cells+" squares drawn)");return a.join(" · ")}
+function fightInfo(c){c=c||{};var its=c.its||[];var cells=Object.keys((c.map&&c.map.cells)||{}).length;if(!its.length&&!(c.fxs||[]).length&&!cells&&!c.fight)return null;return{n:its.length,rnd:c.rnd||1,onMap:its.filter(function(i){return i.pos}).length,fx:(c.fxs||[]).length,cells:cells,fm:c.fight?(c.fight.name||"battle map"):null}}
+function fightTxt(fi){var a=[];if(fi.n)a.push("Round "+fi.rnd+" · "+fi.n+" combatant"+(fi.n===1?"":"s"));if(fi.onMap)a.push(fi.onMap+" on the map");if(fi.fx)a.push(fi.fx+(fi.fx===1?" effect":" effects"));if(fi.fm)a.push("battle map copy of \u201c"+fi.fm+"\u201d");if(fi.cells)a.push("scratch map ("+fi.cells+(fi.cells===1?" square":" squares")+" drawn)");return a.join(" · ")}
 function getExportData(fight){var r=loadAll();var c=fight?cLoad():null;var out={campaign:(r.meta&&r.meta.campaign)||"Campaign",locations:r.locations||[],npcs:r.npcs||[],encounters:r.encounters||[],monsters:r.monsters||[],factions:r.factions||[],sessions:r.sessions||[],party:r.party||[],storyNodes:r.storyNodes||[],storyEdges:r.storyEdges||[]};if(c&&fightInfo(c))out.combat=c;return out}
 function doExport(filename,fight){
   var d=getExportData(fight);var j=JSON.stringify(d,null,2);var b=new Blob([j],{type:"application/json"});
@@ -425,6 +434,21 @@ var SZQ={large:2,huge:3,gargantuan:4,colossal:6};
 function sizeSq(s){return SZQ[(s||"").toLowerCase().trim()]||1}
 function dist35(dx,dy){var a=Math.abs(dx),b=Math.abs(dy);var mx=Math.max(a,b),mn=Math.min(a,b);return 5*(mx+Math.floor(mn/2))}
 function tokLbl(n){var w=(n||"?").trim().split(/\s+/);var last=w[w.length-1];var num=/^\d+$/.test(last)&&w.length>1?last:"";return (w[0].charAt(0).toUpperCase())+num}
+function foeItem(m,name,base){var st=m.stats||{};var im=parseInt(st.init)||0;var tp=(st.type||"").toLowerCase();var hp=rollHD(st.hd);if(hp==null){var f=parseInt(st.hp);hp=isNaN(f)?null:f}return{id:gid("ini"),name:name,base:base,init:rollD(20)+im,mod:im||null,hp:hp,max:hp,d0:tp.indexOf("undead")>=0||tp.indexOf("construct")>=0,sz:sizeSq(st.size),mon:true}}
+function encFoes(enc,da){if(!enc)return[];return (enc.monsters||[]).map(function(id){return (da.monsters||[]).find(function(m){return m.id===id})}).concat((enc.npcs||[]).map(function(id){return (da.npcs||[]).find(function(m){return m.id===id})})).filter(Boolean)}
+function findFoe(s,da){var all=(da.monsters||[]).concat(da.npcs||[]);return all.find(function(m){return m.id===s.ref})||all.find(function(m){return m.name===s.nm})||null}
+function mapHas(m){return !!m&&(Object.keys(m.cells||{}).length>0||(m.starts||[]).length>0)}
+function MapThumb(p){var m=p.map;if(!m)return null;return <svg viewBox={"0 0 "+m.w+" "+m.h} style={{width:"100%",maxWidth:p.max||320,display:"block",background:"#efe6d6",borderRadius:4,border:"1px solid var(--bd)"}} preserveAspectRatio="xMidYMid meet">
+  {Object.keys(m.cells||{}).map(function(k){var a=k.split(",");var t=TERR[m.cells[k]];return t?<rect key={k} x={a[0]} y={a[1]} width="1" height="1" fill={t.f} opacity={Math.max(t.o,.5)}/>:null})}
+  {(m.starts||[]).map(function(st,i){var z=st.sz||1;return <circle key={i} cx={st.x+z/2} cy={st.y+z/2} r={z*.4} fill="#9b2c2c" opacity=".85"/>})}
+</svg>}
+var ASK={set:null};
+function ask(msg,yes,ok){if(ASK.set)ASK.set({msg:msg,yes:yes,ok:ok||"OK"});else if(window.confirm(msg))yes()}
+function AskMo(p){var a=p.a;useEffect(function(){function k(e){if(e.key==="Escape")p.onClose()}window.addEventListener("keydown",k);return function(){window.removeEventListener("keydown",k)}},[a]);
+  return <div className="mo" style={{zIndex:200}} onClick={p.onClose}><div className="mo-bx" style={{maxWidth:400}} onClick={function(e){e.stopPropagation()}}>
+    <div className="mo-bd" style={{paddingTop:22,fontSize:15,lineHeight:1.5}}>{a.msg}</div>
+    <div className="mo-ft"><button className="btn btn-s" onClick={p.onClose}>Cancel</button><button className="btn btn-p" autoFocus onClick={function(){p.onClose();a.yes()}}>{a.ok}</button></div>
+  </div></div>}
 function cLoad(){try{return JSON.parse(localStorage.getItem("dmtk3:combat"))||{}}catch(e){return{}}}
 function gid(p){return p+"_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,6)}
 function buildTree(locs){if(!locs||!locs.length)return[];var m={};locs.forEach(function(l){m[l.id]=Object.assign({},l,{children:[]})});var r=[];locs.forEach(function(l){if(l.parent&&m[l.parent])m[l.parent].children.push(m[l.id]);else r.push(m[l.id])});return r}
@@ -603,6 +627,14 @@ function EntDet(p){
     {tp==="encounters"&&<div className="fld"><div className="fld-l">Encounter Type</div><select className="fld-sel" value={d.type||"combat"} onChange={function(e){u("type",e.target.value)}}>{ENC_T.map(function(t){return <option key={t} value={t}>{t}</option>})}</select></div>}
 
     {/* ── Rich Encounter Sections ── */}
+    {tp==="encounters"&&(function(){var em=p.entity.map;var has=mapHas(em);var ns=(em&&em.starts||[]).length;var nf=encFoes(p.entity,da).length;return <div className="fld"><div className="fld-l">Battle Map</div>
+      <div style={{display:"flex",gap:12,alignItems:"center",flexWrap:"wrap",padding:10,border:"1px solid var(--bd)",borderRadius:8,background:"var(--inp)"}}>
+        {has?<div style={{width:180}}><MapThumb map={em} max={180}/></div>:<div style={{width:180,height:100,border:"2px dashed var(--bd)",borderRadius:6,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,color:"var(--tx2)"}}>No map yet</div>}
+        <div style={{flex:1,minWidth:160,display:"flex",flexDirection:"column",gap:6}}>
+          <div style={{fontSize:12,color:"var(--tx2)"}}>{has?(em.w+"×"+em.h+" squares"+(ns?" · "+ns+" start position"+(ns===1?"":"s"):" · no start positions")):"Draw the battlefield ahead of time."}{" · "+nf+" monster"+(nf===1?"":"s")+"/NPC"+(nf===1?"":"s")+" linked"}</div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}><button className="btn btn-s btn-sm" onClick={function(){p.onMap&&p.onMap(p.entity.id)}}><IMap/> {has?"Edit map":"Draw map"}</button><button className="btn btn-p btn-sm" onClick={function(){p.onRun&&p.onRun(p.entity)}}><IPlay/> Run encounter</button></div>
+          <div style={{fontSize:11,color:"var(--tx2)"}}>{ns?"Run places the "+ns+" creature"+(ns===1?"":"s")+" from the start positions.":"Run adds one of each linked monster. Set start positions on the map to control count and placement."}</div>
+        </div></div></div>})()}
     {tp==="encounters"&&d.boxed_text&&<div className="enc-box"><div className="enc-box-l">{"📖 Read Aloud"}</div><p>{d.boxed_text}</p></div>}
 
     {tp==="encounters"&&d.dm_notes&&<div className="enc-dm"><div className={"enc-dm-h"+(dmO?" open":"")} onClick={function(){sDmO(!dmO)}}><span className="ar2"><IChev/></span>{"🔒 DM Notes"}</div>{dmO&&<div className="enc-dm-bd">{d.dm_notes}</div>}</div>}
@@ -739,7 +771,7 @@ function ImpMo(p){
   function parse(){sE(null);sOk(null);try{var q=JSON.parse(t);if(!q.locations&&!q.npcs&&!q.encounters&&!q.monsters&&!q.factions&&!q.storyNodes&&!q.sessions&&!q.party&&!q.storyEdges&&!q.combat){sE("JSON needs at least one entity array");return null}sPa(q);return q}catch(e){sE("Invalid JSON: "+e.message);return null}}
   var tFight=useMemo(function(){try{var q=JSON.parse(t);return q&&q.combat&&fightInfo(q.combat)?q.combat:null}catch(e){return null}},[t]);var tfi=tFight?fightInfo(tFight):null;
   function doReplace(){var q=pa||parse();if(!q)return;p.onImp(q);sOk(q.combat?"Replaced all data and restored the fight":"Replaced all data")}
-  function doFight(){if(!tFight)return;if(fightInfo(cLoad())&&!window.confirm("Replace the fight currently in the combat tracker?"))return;p.onFight(tFight);sOk("Restored: "+fightTxt(tfi))}
+  function doFight(){if(!tFight)return;var go=function(){p.onFight(tFight);sOk("Restored: "+fightTxt(tfi))};if(fightInfo(cLoad()))ask("Replace the fight currently in the combat tracker?",go,"Replace");else go()}
   function buildPrev(){var q=pa||parse();if(!q)return;sPa(q);var ms=[];var ni=[];var ch={};TYPES.concat(["storyNodes"]).forEach(function(tp){(q[tp]||[]).forEach(function(it){var ex=(p.data[tp]||[]).find(function(e){return e.name&&it.name&&e.name.toLowerCase().trim()===it.name.toLowerCase().trim()});var k=tp+":"+it.id;if(ex){ms.push({type:tp,incoming:it,existing:ex,key:k});ch[k]=true}else{ni.push({type:tp,item:it,key:k});ch[k]=true}})});sMp({ms:ms,ni:ni});sMc(ch)}
   function togCh(k){sMc(function(o){var n=Object.assign({},o);n[k]=!n[k];return n})}
   function doMerge(){if(!mp||!pa)return;p.onMerge(pa,mp.ms.filter(function(m){return mc[m.key]}),mp.ni.filter(function(n){return mc[n.key]}));sOk("Merged!");sMp(null)}
@@ -839,7 +871,7 @@ function PartyView(p){
   var party=p.party||[];
   var _newId=useState(null);var newId=_newId[0];var sNewId=_newId[1];
   function add(){var pc=newPC();sNewId(pc.id);p.onUpdate(party.concat([pc]))}
-  function del(id){if(!window.confirm("Remove this character?"))return;p.onUpdate(party.filter(function(c){return c.id!==id}))}
+  function del(id){ask("Remove this character?",function(){p.onUpdate(party.filter(function(c){return c.id!==id}))},"Remove")}
   function change(id,updated){p.onUpdate(party.map(function(c){return c.id===id?updated:c}))}
   return(<div className="pty-wrap">
     <div className="pty-hd"><h2>Party ({party.length})</h2><button className="btn btn-p" onClick={add}><IPlus/> Add Character</button></div>
@@ -849,11 +881,13 @@ function PartyView(p){
 }
 
 /* ═══ Battle Map ═══ */
-var TERR={wall:{f:"#3a3a48",o:1,l:"Wall"},diff:{f:"#a0743c",o:.45,l:"Difficult"},water:{f:"#4f86c6",o:.55,l:"Water"},plant:{f:"#3f8a3a",o:.6,l:"Plants"}};
+var TERR={wall:{f:"#3a3a48",o:1,l:"Wall"},diff:{f:"#a0743c",o:.45,l:"Difficult"},water:{f:"#4f86c6",o:.55,l:"Water"},plant:{f:"#3f8a3a",o:.6,l:"Plants"},wood:{f:"#8b5a2b",o:.8,l:"Wood"}};
 function BattleMap(p){
   var its=p.its||[],sIts=p.sIts;var encs=p.encounters||[];
-  var src=p.mapId?encs.find(function(e){return e.id===p.mapId}):null;
-  var srcMap=src?src.map:p.scratch;
+  var isF=p.mapId==="fight"&&!!p.fight;
+  var src=!isF&&p.mapId?encs.find(function(e){return e.id===p.mapId}):null;
+  var fromEnc=isF?encs.find(function(e){return e.id===p.fight.from}):null;
+  var srcMap=isF?p.fight:src?src.map:p.scratch;
   var _m=useState(srcMap||{w:20,h:15,cells:{}});var m=_m[0];var sM=_m[1];
   var mRef=useRef(m);mRef.current=m;
   useEffect(function(){sM(srcMap||{w:20,h:15,cells:{}})},[p.mapId,srcMap]);
@@ -863,11 +897,15 @@ function BattleMap(p){
   var _sel=useState(null);var sel=_sel[0];var sSel=_sel[1];
   var _drg=useState(null);var drg=_drg[0];var sDrg=_drg[1];
   var _ms=useState(null);var meas=_ms[0];var sMeas=_ms[1];
+  var _af=useState(null);var armF=_af[0];var sArmF=_af[1];
+  var da=p.data||{};var foes=encFoes(src,da);var starts=m.starts||[];
   var paint=useRef(null);var svgR=useRef(null);var wrapR=useRef(null);
-  function commit(nm){if(p.mapId)p.onSaveEncMap(p.mapId,nm);else p.setScratch(nm)}
+  function commit(nm){if(isF)p.setFight(Object.assign({},nm,{from:p.fight.from,name:p.fight.name}));else if(src)p.onSaveEncMap(src.id,nm);else p.setScratch(nm)}
+  function saveBack(){if(!fromEnc)return;ask("Overwrite the prepared map of \u201c"+(fromEnc.name||"Encounter")+"\u201d with this battle map? Its start positions are kept.",function(){var st=((fromEnc.map&&fromEnc.map.starts)||[]).filter(function(x){var z=x.sz||1;return x.x+z<=m.w&&x.y+z<=m.h});p.onSaveEncMap(fromEnc.id,{w:m.w,h:m.h,cells:Object.assign({},m.cells||{}),starts:st})},"Overwrite")}
+  function resetF(){if(!fromEnc)return;ask("Throw away changes made during this fight and reload the prepared map?",function(){var em=fromEnc.map||{};p.setFight({w:em.w||20,h:em.h||15,cells:Object.assign({},em.cells||{}),from:fromEnc.id,name:fromEnc.name||"Encounter"})},"Reset")}
   function fit(){var w=wrapR.current?wrapR.current.clientWidth-24:640;var h=wrapR.current?wrapR.current.clientHeight-24:480;sCs(Math.max(14,Math.min(64,Math.floor(Math.min(w/m.w,h/m.h)))))}
   useEffect(function(){fit()},[m.w,m.h]);
-  function resize(w,h){w=Math.max(5,Math.min(60,parseInt(w)||m.w));h=Math.max(5,Math.min(60,parseInt(h)||m.h));var c={};Object.keys(m.cells||{}).forEach(function(k){var a=k.split(",");if(+a[0]<w&&+a[1]<h)c[k]=m.cells[k]});var nm={w:w,h:h,cells:c};sM(nm);commit(nm)}
+  function resize(w,h){w=Math.max(5,Math.min(60,parseInt(w)||m.w));h=Math.max(5,Math.min(60,parseInt(h)||m.h));var c={};Object.keys(m.cells||{}).forEach(function(k){var a=k.split(",");if(+a[0]<w&&+a[1]<h)c[k]=m.cells[k]});var nm=Object.assign({},m,{w:w,h:h,cells:c,starts:(m.starts||[]).filter(function(st){var z=st.sz||1;return st.x+z<=w&&st.y+z<=h})});sM(nm);commit(nm)}
   function cellAt(e){var r=svgR.current.getBoundingClientRect();var x=Math.floor((e.clientX-r.left)/cs),y=Math.floor((e.clientY-r.top)/cs);return{x:Math.max(0,Math.min(m.w-1,x)),y:Math.max(0,Math.min(m.h-1,y))}}
   function tokAt(c){for(var i=its.length-1;i>=0;i--){var t=its[i];if(!t.pos)continue;var z=t.sz||1;if(c.x>=t.pos.x&&c.x<t.pos.x+z&&c.y>=t.pos.y&&c.y<t.pos.y+z)return t}return null}
   function setPos(id,pos){sIts(function(prev){return prev.map(function(i){return i.id===id?Object.assign({},i,{pos:pos}):i})})}
@@ -875,6 +913,9 @@ function BattleMap(p){
   function down(e){if(tool==="pan")return;e.preventDefault();try{svgR.current.setPointerCapture(e.pointerId)}catch(x){}var c=cellAt(e);
     if(TERR[tool]||tool==="erase"){var k=c.x+","+c.y;var v=tool==="erase"?null:((m.cells||{})[k]===tool?null:tool);paint.current={v:v};doPaint(c);return}
     if(tool==="measure"){sMeas({a:c,b:c,on:true});return}
+    if(tool==="start"){var cur=mRef.current;var ss=(cur.starts||[]).slice();var hit=-1;for(var j=ss.length-1;j>=0;j--){var z0=ss[j].sz||1;if(c.x>=ss[j].x&&c.x<ss[j].x+z0&&c.y>=ss[j].y&&c.y<ss[j].y+z0){hit=j;break}}
+      if(hit>=0)ss.splice(hit,1);else if(armF){var fm=foes.find(function(f){return f.id===armF});if(!fm)return;var z1=sizeSq((fm.stats||{}).size);ss.push({ref:fm.id,nm:fm.name,sz:z1,x:Math.min(c.x,cur.w-z1),y:Math.min(c.y,cur.h-z1)})}else return;
+      var nm2=Object.assign({},cur,{starts:ss});mRef.current=nm2;sM(nm2);commit(nm2);return}
     if(arm){var t0=its.find(function(i){return i.id===arm});var z=(t0&&t0.sz)||1;setPos(arm,{x:Math.min(c.x,m.w-z),y:Math.min(c.y,m.h-z)});sSel(arm);sArm(null);return}
     var t=tokAt(c);if(t){sDrg({id:t.id,o:t.pos,off:{x:c.x-t.pos.x,y:c.y-t.pos.y},cur:t.pos,moved:false});sSel(t.id)}else sSel(null)}
   function move(e){if(tool==="pan")return;if(!paint.current&&!drg&&!(meas&&meas.on))return;var c=cellAt(e);
@@ -884,20 +925,36 @@ function BattleMap(p){
   function up(){if(paint.current){paint.current=null;commit(mRef.current);return}if(meas&&meas.on){sMeas(Object.assign({},meas,{on:false}));return}if(drg){if(drg.moved)setPos(drg.id,drg.cur);sDrg(null)}}
   var W=m.w*cs,H=m.h*cs;var off=its.filter(function(i){return !i.pos});var activeId=its[p.act]?its[p.act].id:null;var selT=sel?its.find(function(i){return i.id===sel}):null;
   var gl=[];for(var x=0;x<=m.w;x++)gl.push("M"+x*cs+" 0V"+H);for(var y=0;y<=m.h;y++)gl.push("M0 "+y*cs+"H"+W);
-  var tools=[["move","Move"],["wall","Wall"],["diff","Difficult"],["water","Water"],["plant","Plants"],["erase","Erase"],["measure","Measure"],["pan","Pan"]];
+  function pick(t){sTool(t);sArm(null);sArmF(null);if(t!=="measure")sMeas(null)}
+  var useT=[["move","Move",<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20M2 12h20M12 2l-3 3M12 2l3 3M12 22l-3-3M12 22l3-3M2 12l3-3M2 12l3 3M22 12l-3-3M22 12l-3 3"/></svg>,"Select and drag tokens"],
+    ["measure","Measure",<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="2" y="7" width="20" height="10" rx="1.5"/><path d="M6 7v4M10 7v3M14 7v4M18 7v3"/></svg>,"Drag to measure distance"],
+    ["pan","Pan",<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>,"Scroll a large map on touch screens"]];
+  var drawT=[["wall"],["diff"],["water"],["plant"],["wood"]].map(function(t){return [t[0],TERR[t[0]].l,<span className="bm-sw" style={{background:TERR[t[0]].f,opacity:Math.max(TERR[t[0]].o,.7)}}/>]})
+    .concat([["erase","Erase",<span className="bm-sw" style={{background:"linear-gradient(135deg,#fff 45%,#c0392b 45%,#c0392b 55%,#fff 55%)"}}/>]])
+    .concat(src?[["start","Start spots",<span className="bm-sw" style={{borderRadius:"50%",border:"2px dashed #9b2c2c",background:"rgba(155,44,44,.2)"}}/>]]:[]);
+  var isDraw=drawT.some(function(t){return t[0]===tool});var toolLbl=(drawT.concat(useT).find(function(t){return t[0]===tool})||[])[1];
+  var showStarts=tool==="start"||(src&&its.filter(function(i){return i.pos}).length===0);var sIdx={};
   return(<div className="bm">
     <div className="bm-bar">
-      <select value={p.mapId||""} onChange={function(e){p.setMapId(e.target.value)}}><option value="">Scratch map</option>{encs.map(function(e){return <option key={e.id} value={e.id}>{"Map: "+(e.name||"Untitled")}</option>})}</select>
+      <select value={isF?"fight":(src?src.id:"")} onChange={function(e){p.setMapId(e.target.value)}}>{p.fight&&<option value="fight">{"⚔ Fight: "+(p.fight.name||"battle map")}</option>}<option value="">Scratch map</option><optgroup label="Prepared maps (edits the original)">{encs.map(function(e){return <option key={e.id} value={e.id}>{"Map: "+(e.name||"Untitled")}</option>})}</optgroup></select>
       <input type="number" value={m.w} onChange={function(e){resize(e.target.value,m.h)}} title="Width (squares)"/><span style={{fontSize:12}}>×</span><input type="number" value={m.h} onChange={function(e){resize(m.w,e.target.value)}} title="Height (squares)"/>
-      <div className="bm-grp">{tools.map(function(t){return <button key={t[0]} className={"bm-t"+(tool===t[0]?" on":"")} onClick={function(){sTool(t[0]);sArm(null);if(t[0]!=="measure")sMeas(null)}}>{t[1]}</button>})}</div>
       <div className="bm-grp"><button className="bm-t" onClick={function(){sCs(Math.max(14,cs-6))}}>−</button><button className="bm-t" onClick={fit}>Fit</button><button className="bm-t" onClick={function(){sCs(Math.min(96,cs+6))}}>+</button></div>
-      <button className="bm-t" style={{color:"var(--dg)"}} onClick={function(){if(window.confirm("Clear all terrain on this map?")){var nm=Object.assign({},m,{cells:{}});sM(nm);commit(nm)}}}>Clear terrain</button>
+      {!src&&!isF&&mapHas(m)&&<select value="" onChange={function(e){var id=e.target.value;if(!id)return;var en=encs.find(function(x){return x.id===id});if(!en)return;var go=function(){p.onSaveEncMap(id,{w:m.w,h:m.h,cells:Object.assign({},m.cells||{}),starts:(en.map&&en.map.starts)||[]});p.setMapId(id)};if(mapHas(en.map))ask("\u201c"+(en.name||"Encounter")+"\u201d already has a map. Replace its terrain with this scratch map? (Its start positions are kept.)",go,"Replace");else go()}}><option value="">Save scratch to encounter…</option>{encs.map(function(e){return <option key={e.id} value={e.id}>{(e.name||"Untitled")+(mapHas(e.map)?" (has map)":"")}</option>})}</select>}
+      {src&&<button className="btn btn-p btn-sm" onClick={function(){p.onRun&&p.onRun(src)}}><IPlay/> Run encounter</button>}
+      {isF&&fromEnc&&<button className="btn btn-s btn-sm" onClick={saveBack} title="Overwrite the encounter's prepared map with this battle map">Save to encounter map</button>}
+      {isF&&fromEnc&&<button className="bm-t" onClick={resetF} title="Reload the prepared map">Reset to prepared</button>}
+      <button className="bm-t" style={{color:"var(--dg)"}} onClick={function(){if(!Object.keys(m.cells||{}).length)return;ask("Clear all terrain on this map?"+(isF?" Only this fight\u2019s copy is cleared; the prepared map stays as it is.":src?" This clears the prepared map of the encounter.":""),function(){var nm=Object.assign({},mRef.current,{cells:{}});mRef.current=nm;sM(nm);commit(nm)},"Clear")}}>Clear terrain</button>
     </div>
-    <div className="bm-tray">{its.length===0?<span>Add combatants in the Combat panel, then place them here.</span>:off.length===0?<span>All combatants are on the map.</span>:<React.Fragment><span>Place:</span>{off.map(function(t){return <button key={t.id} className={"bm-chip"+(arm===t.id?" on":"")} onClick={function(){sArm(arm===t.id?null:t.id);sTool("move")}}>{t.name}</button>})}{arm&&<span style={{color:"var(--ac)"}}>Tap a square to place</span>}</React.Fragment>}</div>
+    <div className="bm-tools">
+      <div className="bm-tg bm-use"><span className="bm-cap">Play</span>{useT.map(function(t){return <button key={t[0]} title={t[3]} className={"bm-t"+(tool===t[0]?" on":"")} onClick={function(){pick(t[0])}}>{t[2]}<span>{t[1]}</span></button>})}</div>
+      <div className="bm-tg bm-draw"><span className="bm-cap">Draw</span>{drawT.map(function(t){return <button key={t[0]} className={"bm-t"+(tool===t[0]?" on":"")} onClick={function(){pick(t[0])}}>{t[2]}<span>{t[1]}</span></button>})}</div>
+    </div>
+    <div className="bm-tray">{tool==="start"?(foes.length===0?<span>Link monsters or NPCs to this encounter first, then place their start positions.</span>:<React.Fragment><span>Start spots:</span>{foes.map(function(f){var n=starts.filter(function(st){return st.ref===f.id}).length;return <button key={f.id} className={"bm-chip"+(armF===f.id?" on":"")} onClick={function(){sArmF(armF===f.id?null:f.id)}}>{f.name+(n?" ×"+n:"")}</button>})}<span style={{color:"var(--ac)"}}>{armF?"Tap squares to place (tap a spot again to remove)":"Pick a creature, then tap squares"}</span></React.Fragment>):its.length===0?<span>Add combatants in the Combat panel, then place them here.</span>:off.length===0?<span>All combatants are on the map.</span>:<React.Fragment><span>Place:</span>{off.map(function(t){return <button key={t.id} className={"bm-chip"+(arm===t.id?" on":"")} onClick={function(){sArm(arm===t.id?null:t.id);sTool("move")}}>{t.name}</button>})}{arm&&<span style={{color:"var(--ac)"}}>Tap a square to place</span>}</React.Fragment>}</div>
     <div className="bm-wrap" ref={wrapR}>
       <svg ref={svgR} width={W} height={H} style={{touchAction:tool==="pan"?"auto":"none",cursor:tool==="pan"?"grab":tool==="move"?"pointer":"crosshair"}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
-        {Object.keys(m.cells||{}).map(function(k){var a=k.split(",");var t=TERR[m.cells[k]];if(!t)return null;if(m.cells[k]==="plant")return <g key={k}><rect x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/><circle cx={(+a[0]+.5)*cs} cy={(+a[1]+.5)*cs} r={cs*.22} fill="#2a6a28" opacity=".8"/></g>;return <rect key={k} x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/>})}
+        {Object.keys(m.cells||{}).map(function(k){var a=k.split(",");var t=TERR[m.cells[k]];if(!t)return null;if(m.cells[k]==="wood")return <g key={k}><rect x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/><path d={"M"+a[0]*cs+" "+(+a[1]+1/3)*cs+"h"+cs+"M"+a[0]*cs+" "+(+a[1]+2/3)*cs+"h"+cs} stroke="#5a3818" strokeWidth="1" opacity=".7"/></g>;if(m.cells[k]==="plant")return <g key={k}><rect x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/><circle cx={(+a[0]+.5)*cs} cy={(+a[1]+.5)*cs} r={cs*.22} fill="#2a6a28" opacity=".8"/></g>;return <rect key={k} x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/>})}
         <path d={gl.join("")} stroke="rgba(60,40,20,.22)" strokeWidth="1" fill="none"/>
+        {showStarts&&starts.map(function(st,i){var z=st.sz||1;sIdx[st.ref]=(sIdx[st.ref]||0)+1;var tot=starts.filter(function(x){return x.ref===st.ref}).length;var cx=(st.x+z/2)*cs,cy=(st.y+z/2)*cs,r=z*cs*.42;return <g key={"s"+i} style={{pointerEvents:"none"}} opacity=".75"><circle cx={cx} cy={cy} r={r} fill="rgba(155,44,44,.25)" stroke="#9b2c2c" strokeWidth="2" strokeDasharray="4 3"/><text x={cx} y={cy} textAnchor="middle" dominantBaseline="central" fill="#7a1f1f" fontSize={Math.max(9,z*cs*.32)} fontWeight="700">{tokLbl(st.nm||"?")+(tot>1?sIdx[st.ref]:"")}</text></g>})}
         {its.map(function(t){if(!t.pos)return null;var z=t.sz||1;var ps=drg&&drg.id===t.id?drg.cur:t.pos;var cx=(ps.x+z/2)*cs,cy=(ps.y+z/2)*cs,r=z*cs*.42;var dn=isDown(t);var fill=dn?"#8a8a8a":t.pc?"#2f5d8a":"#9b2c2c";var rr=t.hp!=null&&t.max?Math.max(0,Math.min(1,t.hp/t.max)):null;
           return <g key={t.id} opacity={dn?.5:1}>
             {t.id===activeId&&<circle cx={cx} cy={cy} r={r+4} fill="none" stroke="#e0a526" strokeWidth="3"/>}
@@ -909,7 +966,7 @@ function BattleMap(p){
         {meas&&(function(){var ft=dist35(meas.b.x-meas.a.x,meas.b.y-meas.a.y);return <g style={{pointerEvents:"none"}}><line x1={(meas.a.x+.5)*cs} y1={(meas.a.y+.5)*cs} x2={(meas.b.x+.5)*cs} y2={(meas.b.y+.5)*cs} stroke="#2c2c2c" strokeWidth="2" strokeDasharray="6 4"/><circle cx={(meas.a.x+.5)*cs} cy={(meas.a.y+.5)*cs} r="4" fill="#2c2c2c"/><text x={(meas.a.x+meas.b.x+1)/2*cs} y={(meas.a.y+meas.b.y+1)/2*cs-8} textAnchor="middle" fontSize="13" fontWeight="700" fill="#2c2c2c" stroke="#fff" strokeWidth="3" paintOrder="stroke">{ft+" ft"}</text></g>})()}
       </svg>
     </div>
-    <div className="bm-info">{selT?<React.Fragment><strong>{selT.name}</strong>{selT.hp!=null&&<span>{selT.hp+"/"+selT.max+" HP"}</span>}{hpState(selT)&&<span style={{color:"var(--dg)",fontWeight:700}}>{hpState(selT)}</span>}{(selT.sz||1)>1&&<span>{(selT.sz*5)+" ft space"}</span>}<button className="bm-t" onClick={function(){setPos(selT.id,null);sSel(null)}}>Remove from map</button></React.Fragment>:<span>1 square = 5 ft · diagonals count 5/10/5 (3.5 rule){meas?" · Measured: "+dist35(meas.b.x-meas.a.x,meas.b.y-meas.a.y)+" ft":""}</span>}</div>
+    <div className="bm-info">{selT?<React.Fragment><strong>{selT.name}</strong>{selT.hp!=null&&<span>{selT.hp+"/"+selT.max+" HP"}</span>}{hpState(selT)&&<span style={{color:"var(--dg)",fontWeight:700}}>{hpState(selT)}</span>}{(selT.sz||1)>1&&<span>{(selT.sz*5)+" ft space"}</span>}<button className="bm-t" onClick={function(){setPos(selT.id,null);sSel(null)}}>Remove from map</button></React.Fragment>:<span>{isDraw&&tool!=="start"?<strong style={{color:"var(--ac)"}}>{"Drawing: "+toolLbl+" · "}</strong>:null}{isDraw&&tool!=="start"?(tool==="erase"?"drag over squares to clear them · ":"tap or drag to paint, paint over the same terrain to clear it · "):null}1 square = 5 ft · diagonals count 5/10/5 (3.5 rule){meas?" · Measured: "+dist35(meas.b.x-meas.a.x,meas.b.y-meas.a.y)+" ft":""}</span>}</div>
   </div>);
 }
 
@@ -933,11 +990,11 @@ function CombatPanel(p){
   var encs=(da.encounters||[]).slice().sort(function(a,b){return (a.type==="combat"?0:1)-(b.type==="combat"?0:1)});
   var selEnc=encSel?encs.find(function(e){return e.id===encSel}):null;
   var encFoes=selEnc?((selEnc.monsters||[]).map(function(id){return (da.monsters||[]).find(function(m){return m.id===id})}).concat((selEnc.npcs||[]).map(function(id){return (da.npcs||[]).find(function(m){return m.id===id})})).filter(Boolean)):[];
-  function addIt(){if(!nm.trim())return;var total=(parseInt(ini)||0)+(addB?pcMod:0);var hv=parseInt(hpIn);var isPc=party.some(function(pc){return pc.name===nm.trim()});sIts(function(prev){return prev.concat([{id:gid("ini"),name:nm.trim(),init:total,mod:pcMod||null,pc:isPc,hp:isNaN(hv)?null:hv,max:isNaN(hv)?null:hv}])});sNm("");sIni("");sPcMod(0);sHpIn("")}
-  function addFoe(m,n){var st=m.stats||{};var base=(m.name||"Monster").trim();var im=parseInt(st.init)||0;var tp=(st.type||"").toLowerCase();var d0=tp.indexOf("undead")>=0||tp.indexOf("construct")>=0;var sz=sizeSq(st.size);
-    sIts(function(prev){var ex=prev.filter(function(i){return i.base===base}).length;var add=[];for(var i=0;i<n;i++){var hp=rollHD(st.hd);if(hp==null){var f=parseInt(st.hp);hp=isNaN(f)?null:f}var k=ex+i+1;add.push({id:gid("ini"),name:(n>1||ex>0)?base+" "+k:base,base:base,init:rollD(20)+im,mod:im||null,hp:hp,max:hp,d0:d0,sz:sz,mon:true})}return prev.concat(add)})}
-  function applyHp(id,sign){var a=parseInt(dmg[id]);if(isNaN(a)||a<=0)return;sIts(function(prev){return prev.map(function(i){if(i.id!==id||i.hp==null)return i;var h=i.hp-sign*a;if(sign<0&&i.max!=null)h=Math.min(h,i.max);return Object.assign({},i,{hp:h})})});sDmg(function(o){var n=Object.assign({},o);delete n[id];return n})}
-  function addPC(pc){sNm(pc.name);sIni("");sPcMod(parseInt(pc.initiative_mod)||0)}
+  function addIt(){if(!nm.trim())return;var total=(parseInt(ini)||0)+(addB?pcMod:0);var hv=parseInt(hpIn);var pcO=party.find(function(pc){return pc.name===nm.trim()});if(pcO&&!isNaN(hv)&&hv!==parseInt(pcO.hp_current)&&p.onPcHp)p.onPcHp(pcO.id,hv);sIts(function(prev){return prev.concat([{id:gid("ini"),name:nm.trim(),init:total,mod:pcMod||null,pc:!!pcO,pcId:pcO?pcO.id:null,hp:isNaN(hv)?null:hv,max:isNaN(hv)?null:hv}])});sNm("");sIni("");sPcMod(0);sHpIn("")}
+  function addFoe(m,n){var base=(m.name||"Monster").trim();
+    sIts(function(prev){var ex=prev.filter(function(i){return i.base===base}).length;var add=[];for(var i=0;i<n;i++){var k=ex+i+1;add.push(foeItem(m,(n>1||ex>0)?base+" "+k:base,base))}return prev.concat(add)})}
+  function applyHp(id,sign){var a=parseInt(dmg[id]);if(isNaN(a)||a<=0)return;var cur=its.find(function(i){return i.id===id});if(cur&&cur.pcLink&&p.onPcHp){var h=cur.hp-sign*a;if(sign<0&&cur.max!=null)h=Math.min(h,cur.max);p.onPcHp(cur.pcLink,h);sDmg(function(o){var n=Object.assign({},o);delete n[id];return n});return}sIts(function(prev){return prev.map(function(i){if(i.id!==id||i.hp==null)return i;var h=i.hp-sign*a;if(sign<0&&i.max!=null)h=Math.min(h,i.max);return Object.assign({},i,{hp:h})})});sDmg(function(o){var n=Object.assign({},o);delete n[id];return n})}
+  function addPC(pc){sNm(pc.name);sIni("");sPcMod(parseInt(pc.initiative_mod)||0);sHpIn(pc.hp_current!=null&&pc.hp_current!==""?String(pc.hp_current):"")}
   function rmIt(id){sIts(function(prev){var n=prev.filter(function(i){return i.id!==id});if(act>=n.length)sAct(Math.max(0,n.length-1));return n})}
   function mvUp(idx){if(idx<=0)return;sIts(function(prev){var n=prev.slice();var t=n[idx];n[idx]=n[idx-1];n[idx-1]=t;if(act===idx)sAct(idx-1);else if(act===idx-1)sAct(idx);return n})}
   function mvDn(idx){sIts(function(prev){if(idx>=prev.length-1)return prev;var n=prev.slice();var t=n[idx];n[idx]=n[idx+1];n[idx+1]=t;if(act===idx)sAct(idx+1);else if(act===idx+1)sAct(idx);return n})}
@@ -959,7 +1016,7 @@ function CombatPanel(p){
         {selEnc&&<div style={{marginTop:4}}>{encFoes.map(function(m){var st=m.stats||{};return <div key={m.id} className="cbt-mon"><span className="nm">{m.name}</span><span className="sub">{st.hd||(st.hp?st.hp+" hp":"no HP")}</span><span className="sub">×</span><input value={cnt[m.id]==null?"1":cnt[m.id]} onChange={function(e){var v=e.target.value;sCnt(function(o){var n=Object.assign({},o);n[m.id]=v;return n})}}/><button className="btn btn-s btn-sm" onClick={function(){addFoe(m,Math.max(1,Math.min(30,parseInt(cnt[m.id])||1)))}}>Add</button></div>})}{encFoes.length===0&&<div style={{fontSize:11,color:"var(--tx2)",padding:4}}>No monsters or NPCs linked to this encounter.</div>}</div>}</div>}
       {party.length>0&&<div className="init-pty">{party.map(function(pc){return <button key={pc.id} className="init-pty-btn" onClick={function(){addPC(pc)}}>{pc.name} ({pc.initiative_mod>=0?"+":""}{pc.initiative_mod})</button>})}</div>}
       <div className="init-add"><input value={nm} onChange={function(e){sNm(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")addIt()}} placeholder="Name..."/><input className="init-num" value={ini} onChange={function(e){sIni(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")addIt()}} placeholder={pcMod&&addB?"d20 roll":"Init"}/><input className="init-num" value={hpIn} onChange={function(e){sHpIn(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")addIt()}} placeholder="HP"/>{pcMod!==0&&<span style={{fontSize:12,color:"var(--tx2)",whiteSpace:"nowrap",alignSelf:"center"}}>{(pcMod>0?"+":"")+pcMod}</span>}<button className="btn btn-p btn-sm" onClick={addIt}><IPlus/></button></div>
-      <div className="init-list">{its.map(function(it,idx){return <div key={it.id} className={"init-it"+(idx===act?" active":"")+(dg===idx?" dragging":"")+(isDown(it)?" down":"")} draggable onDragStart={function(e){onDragStart(e,idx)}} onDragOver={function(e){onDragOver(e,idx)}} onDragEnd={onDragEnd}><span className="it-pos">{idx+1}</span><span className="it-nm">{it.name}</span><span className="it-ini">{it.init}{it.mod?<span style={{fontSize:11,opacity:.6,marginLeft:3}}>{"("+(it.mod>0?"+":"")+it.mod+")"}</span>:null}</span><div className="it-act"><button onClick={function(){mvUp(idx)}} title="Up"><IUp2/></button><button onClick={function(){mvDn(idx)}} title="Down"><IDn2/></button><button className="del" onClick={function(){rmIt(it.id)}} title="Remove"><IX/></button></div>{it.hp!=null&&(function(){var st=hpState(it);var r=it.max?Math.max(0,Math.min(1,it.hp/it.max)):0;var col=r>.5?"#27ae60":r>.25?"#d4a017":"#c0392b";return <div className="it-hp" draggable={false} onDragStart={function(e){e.preventDefault();e.stopPropagation()}}><div className="it-hpb"><div style={{width:(r*100)+"%",background:col}}/></div><span className="it-hpv">{it.hp}/{it.max}</span>{st&&<span className="it-st">{st}</span>}<input inputMode="numeric" value={dmg[it.id]||""} onChange={function(e){var v=e.target.value;sDmg(function(o){var n=Object.assign({},o);n[it.id]=v;return n})}} onKeyDown={function(e){if(e.key==="Enter")applyHp(it.id,1)}} placeholder="amt"/><button className="dmg" onClick={function(){applyHp(it.id,1)}} title="Damage">−</button><button className="heal" onClick={function(){applyHp(it.id,-1)}} title="Heal">+</button></div>})()}</div>})}</div>
+      <div className="init-list">{its.map(function(it,idx){return <div key={it.id} className={"init-it"+(idx===act?" active":"")+(dg===idx?" dragging":"")+(isDown(it)?" down":"")} draggable onDragStart={function(e){onDragStart(e,idx)}} onDragOver={function(e){onDragOver(e,idx)}} onDragEnd={onDragEnd}><span className="it-pos">{idx+1}</span><span className="it-nm">{it.name}</span><span className="it-ini">{it.init}{it.mod?<span style={{fontSize:11,opacity:.6,marginLeft:3}}>{"("+(it.mod>0?"+":"")+it.mod+")"}</span>:null}</span><div className="it-act"><button onClick={function(){mvUp(idx)}} title="Up"><IUp2/></button><button onClick={function(){mvDn(idx)}} title="Down"><IDn2/></button><button className="del" onClick={function(){rmIt(it.id)}} title="Remove"><IX/></button></div>{it.hp!=null&&(function(){var st=hpState(it);var r=it.max?Math.max(0,Math.min(1,it.hp/it.max)):0;var col=r>.5?"#27ae60":r>.25?"#d4a017":"#c0392b";return <div className="it-hp" draggable={false} onDragStart={function(e){e.preventDefault();e.stopPropagation()}}><div className="it-hpb"><div style={{width:(r*100)+"%",background:col}}/></div><span className="it-hpv">{it.hp}/{it.max}</span>{st&&<span className="it-st">{st}</span>}<input inputMode="numeric" value={dmg[it.id]||""} onChange={function(e){var v=e.target.value;sDmg(function(o){var n=Object.assign({},o);n[it.id]=v;return n})}} onKeyDown={function(e){if(e.key==="Enter")applyHp(it.id,1)}} placeholder="±HP" title="Type an amount, then press − for damage or + for healing"/><button className="dmg" onClick={function(){applyHp(it.id,1)}} title="Damage">−</button><button className="heal" onClick={function(){applyHp(it.id,-1)}} title="Heal">+</button></div>})()}</div>})}</div>
       {its.length>0&&<div className="init-nxt"><button className="btn btn-s btn-sm" onClick={prevTurn}>Prev</button><button className="btn btn-p btn-sm" onClick={nextTurn}><IPlay/> Next</button><button className="btn btn-s btn-sm" onClick={sortByInit}>Sort</button></div>}
       {its.length>0&&<div style={{marginTop:6}}><button className="btn btn-d btn-sm" style={{width:"100%"}} onClick={clearAll}><ITr/> Clear All</button></div>}
       {its.length===0&&<div style={{color:"var(--tx2)",fontSize:12,textAlign:"center",padding:12,opacity:.5}}>Add party members or type any name to start combat.</div>}
@@ -1068,7 +1125,9 @@ function App(){
   var _cFxs=useState(function(){return cLoad().fxs||[]});var cFxs=_cFxs[0];var sCFxs=_cFxs[1];
   var _cMap=useState(function(){return cLoad().map||{w:20,h:15,cells:{}}});var cMap=_cMap[0];var sCMap=_cMap[1];
   var _cMid=useState(function(){return cLoad().mapId||""});var cMid=_cMid[0];var sCMid=_cMid[1];
-  useEffect(function(){try{localStorage.setItem("dmtk3:combat",JSON.stringify({its:cIts,rnd:cRnd,act:cAct,fxs:cFxs,map:cMap,mapId:cMid}))}catch(e){}},[cIts,cRnd,cAct,cFxs,cMap,cMid]);
+  var _ask=useState(null);var askA=_ask[0];var sAskA=_ask[1];ASK.set=sAskA;
+  var _cFm=useState(function(){return cLoad().fight||null});var cFm=_cFm[0];var sCFm=_cFm[1];
+  useEffect(function(){try{localStorage.setItem("dmtk3:combat",JSON.stringify({its:cIts,rnd:cRnd,act:cAct,fxs:cFxs,map:cMap,mapId:cMid,fight:cFm}))}catch(e){}},[cIts,cRnd,cAct,cFxs,cMap,cMid,cFm]);
 
   useEffect(function(){var ld=loadAll();var meta=ld.meta||{campaign:"Threads And Tales"};if(meta.campaign==="New Campaign")meta.campaign="Threads And Tales";sSave("meta",meta);sDA({meta:meta,locations:ld.locations||[],npcs:ld.npcs||[],encounters:ld.encounters||[],monsters:ld.monsters||[],factions:ld.factions||[],sessions:ld.sessions||[],party:ld.party||[],storyNodes:ld.storyNodes||[],storyEdges:ld.storyEdges||[]});sLo(false);setTimeout(function(){var sp=document.getElementById("splash");if(sp)sp.classList.add("hide");setTimeout(function(){if(sp&&sp.parentNode)sp.parentNode.removeChild(sp)},700)},2000)},[]);
 
@@ -1079,7 +1138,7 @@ function App(){
   var hSave=useCallback(function(type,ent){
     sDA(function(prev){
       var ls={};Object.keys(prev).forEach(function(k){if(Array.isArray(prev[k]))ls[k]=prev[k].slice()});
-      var ml=(ls[type]||[]).slice();var idx=ml.findIndex(function(e){return e.id===ent.id});if(idx>=0)ml[idx]=ent;else ml.push(ent);ls[type]=ml;
+      var ml=(ls[type]||[]).slice();var idx=ml.findIndex(function(e){return e.id===ent.id});if(idx>=0){if(type==="encounters"){ent=Object.assign({},ent);if(ml[idx].map)ent.map=ml[idx].map;else delete ent.map}ml[idx]=ent}else ml.push(ent);ls[type]=ml;
       // Auto story node for encounters
       if(type==="encounters"&&!(ls.storyNodes||[]).some(function(s){return s.encounter_id===ent.id})){var sns=(ls.storyNodes||[]).slice();var mx=100;sns.forEach(function(s){if(s.x>mx)mx=s.x});sns.push({id:gid("stn"),name:ent.name||"New Scene",description:"",type:ent.type||"event",status:"upcoming",x:sns.length>0?mx+280:100,y:100,encounter_id:ent.id});ls.storyNodes=sns;sSave("storyNodes",sns)}
       // Sync encounter name/type/status to linked story nodes
@@ -1109,7 +1168,7 @@ function App(){
     });sSl({type:null,id:null});shT("Deleted","err");
   },[shT]);
 
-  var restoreFight=useCallback(function(c){c=c||{};sCIts(c.its||[]);sCRnd(c.rnd||1);sCAct(c.act||0);sCFxs(c.fxs||[]);sCMap(c.map||{w:20,h:15,cells:{}});sCMid(c.mapId||"")},[]);
+  var restoreFight=useCallback(function(c){c=c||{};sCIts(c.its||[]);sCRnd(c.rnd||1);sCAct(c.act||0);sCFxs(c.fxs||[]);sCMap(c.map||{w:20,h:15,cells:{}});sCMid(c.mapId||"");sCFm(c.fight||null)},[]);
   var hImp=useCallback(function(pa){if(pa.combat)restoreFight(pa.combat);sDA(function(prev){var n={meta:{campaign:pa.campaign||(prev.meta&&prev.meta.campaign)||"Campaign"},locations:pa.locations||prev.locations,npcs:pa.npcs||prev.npcs,encounters:pa.encounters||prev.encounters,monsters:pa.monsters||prev.monsters,factions:pa.factions||prev.factions,sessions:pa.sessions||prev.sessions,party:pa.party||prev.party,storyNodes:pa.storyNodes||prev.storyNodes,storyEdges:pa.storyEdges||prev.storyEdges};saveAll(n);return n});shT("Imported!");sSl({type:null,id:null})},[shT]);
 
   var hMerge=useCallback(function(pa,ms,ni){sDA(function(prev){
@@ -1130,6 +1189,18 @@ function App(){
     var res=Object.assign({},prev,ls,{meta:{campaign:prev.meta?prev.meta.campaign:cn}});saveAll(res);return res});shT("Merged!");sSl({type:null,id:null})},[shT]);
 
   var addEnt=useCallback(function(type){var e=tmpl(type);if(!e)return;sDA(function(prev){var l=[e].concat(prev[type]||[]);sSave(type,l);return Object.assign({},prev,{[type]:l})});sSl({type:type,id:e.id});sVw("content")},[]);
+  var pcHp=useCallback(function(id,hp){sDA(function(prev){var pa=(prev.party||[]).map(function(c){return c.id===id?Object.assign({},c,{hp_current:hp}):c});sSave("party",pa);return Object.assign({},prev,{party:pa})})},[]);
+  var cItsV=useMemo(function(){var pa=da.party||[];return cIts.map(function(it){var pc=it.pcId?pa.find(function(c){return c.id===it.pcId}):null;if(!pc&&it.pc)pc=pa.find(function(c){return c.name===it.name});if(!pc)return it;var h=parseInt(pc.hp_current),mx=parseInt(pc.hp_max);return Object.assign({},it,{pc:true,pcLink:pc.id,hp:isNaN(h)?null:h,max:isNaN(mx)?null:mx})})},[cIts,da.party]);
+  var openMap=useCallback(function(id){sCMid(id);sVw("map");sSb(false)},[]);
+  var runEnc=useCallback(function(enc){if(!enc)return;var st=(enc.map&&enc.map.starts)||[];var list=[];
+    if(st.length)st.forEach(function(s){var m=findFoe(s,da);if(m)list.push({m:m,pos:{x:s.x,y:s.y}})});else encFoes(enc,da).forEach(function(m){list.push({m:m,pos:null})});
+    var go=function(){
+    var tot={};list.forEach(function(l){var b=(l.m.name||"Monster").trim();tot[b]=(tot[b]||0)+1});var seen={};
+    var its=list.map(function(l){var b=(l.m.name||"Monster").trim();seen[b]=(seen[b]||0)+1;var it=foeItem(l.m,tot[b]>1?b+" "+seen[b]:b,b);if(l.pos)it.pos=l.pos;return it}).sort(function(a,b){return b.init-a.init});
+    var em=enc.map||{};sCFm({w:em.w||20,h:em.h||15,cells:Object.assign({},em.cells||{}),from:enc.id,name:enc.name||"Encounter"});
+    sCIts(its);sCRnd(1);sCAct(0);sCFxs([]);sCMid("fight");sVw("map");sSb(false);
+    shT(its.length?its.length+" creature"+(its.length===1?"":"s")+" ready, add the PCs":"Map loaded")};
+    if(cIts.length)ask("Clear the current fight and start \u201c"+(enc.name||"this encounter")+"\u201d?",go,"Start");else go()},[da,cIts,shT]);
   var saveEncMap=useCallback(function(id,m){sDA(function(prev){var encs=(prev.encounters||[]).map(function(e){return e.id===id?Object.assign({},e,{map:m}):e});sSave("encounters",encs);return Object.assign({},prev,{encounters:encs})})},[]);
   var addSes=useCallback(function(){var s={id:gid("ses"),date:new Date().toISOString().split("T")[0],title:"",notes:[]};sDA(function(prev){var ss=[s].concat(prev.sessions||[]);sSave("sessions",ss);return Object.assign({},prev,{sessions:ss})});sSl({type:"sessions",id:s.id});sVw("content")},[]);
   var crInline=useCallback(function(type,name){var e=tmpl(type,name);if(!e)return null;sDA(function(prev){var l=(prev[type]||[]).concat([e]);sSave(type,l);return Object.assign({},prev,{[type]:l})});return e.id},[]);
@@ -1199,14 +1270,15 @@ function App(){
       <div style={{display:"flex",gap:6,flexShrink:0}}><button className="btn btn-s" onClick={function(){sSe2(true)}}><IDn/> Export</button><button className="btn btn-s" onClick={function(){sSi(true)}}><IUp/> Import</button></div>
     </div>
     {vw==="storyline"?<StoryView nodes={da.storyNodes} edges={da.storyEdges} setNodes={function(fn){sDA(function(p){return Object.assign({},p,{storyNodes:typeof fn==="function"?fn(p.storyNodes):fn})})}} setEdges={function(fn){sDA(function(p){return Object.assign({},p,{storyEdges:typeof fn==="function"?fn(p.storyEdges):fn})})}} data={da} onNav={nav} showT={shT} onCreateEnc={crInline} onSyncEnc={syncEnc}/>
-    :vw==="map"?<BattleMap its={cIts} sIts={sCIts} act={cAct} encounters={da.encounters} mapId={cMid} setMapId={sCMid} scratch={cMap} setScratch={sCMap} onSaveEncMap={saveEncMap}/>
+    :vw==="map"?<BattleMap its={cItsV} data={da} onRun={runEnc} fight={cFm} setFight={sCFm} sIts={sCIts} act={cAct} encounters={da.encounters} mapId={cMid} setMapId={sCMid} scratch={cMap} setScratch={sCMap} onSaveEncMap={saveEncMap}/>
     :vw==="party"?<PartyView party={da.party} onUpdate={updateParty}/>
     :<div className="ct-sc">{!sEnt?<div className="welcome"><h2>Welcome, Dungeon Master</h2><p>{da.locations&&da.locations.length>0?"Select an entry from the sidebar, or switch to Storyline view.":"Import adventure data or add entries to get started."}</p>{(!da.locations||da.locations.length===0)&&<button className="btn btn-p" onClick={function(){sSi(true)}}><IUp/> Import</button>}{da.locations&&da.locations.length>0&&<div style={{color:"var(--tx2)",fontSize:13,marginTop:6}}>{da.locations.length} loc · {(da.npcs||[]).length} NPCs · {(da.encounters||[]).length} enc · {(da.monsters||[]).length} mon · {(da.party||[]).length} PCs</div>}</div>
     :sl.type==="sessions"?<SesDet session={sEnt} onSave={hSave} onDel={hDel}/>
-    :<EntDet type={sl.type} entity={sEnt} data={da} onSave={hSave} onNav={nav} onDel={hDel} onCr={crInline}/>}</div>}
+    :<EntDet type={sl.type} entity={sEnt} data={da} onMap={openMap} onRun={runEnc} onSave={hSave} onNav={nav} onDel={hDel} onCr={crInline}/>}</div>}
     </div>
   </div>
-  <CombatPanel data={da} open={cbt} onClose={function(){sCbt(false)}} party={da.party} its={cIts} sIts={sCIts} rnd={cRnd} sRnd={sCRnd} act={cAct} sAct={sCAct} fxs={cFxs} sFxs={sCFxs}/>
+  <CombatPanel data={da} onPcHp={pcHp} open={cbt} onClose={function(){sCbt(false)}} party={da.party} its={cItsV} sIts={sCIts} rnd={cRnd} sRnd={sCRnd} act={cAct} sAct={sCAct} fxs={cFxs} sFxs={sCFxs}/>
+  {askA&&<AskMo a={askA} onClose={function(){sAskA(null)}}/>}
   {se2&&<ExpMo onClose={function(){sSe2(false)}} onDone={function(){shT("Exported")}}/>}
   {si&&<ImpMo onFight={function(c){restoreFight(c);shT("Fight restored")}} onClose={function(){sSi(false)}} onImp={hImp} onMerge={hMerge} data={da}/>}
   {to&&<Toast key={to.key} msg={to.msg} type={to.type} onDone={function(){sTo(null)}}/>}

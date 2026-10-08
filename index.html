@@ -402,7 +402,8 @@ function sGet(k){try{var r=localStorage.getItem(SK[k]);return r?JSON.parse(r):nu
 function sSave(k,v){try{localStorage.setItem(SK[k],JSON.stringify(v))}catch(e){console.error(e)}}
 function loadAll(){var d={};Object.keys(SK).forEach(function(k){d[k]=sGet(k)});return d}
 function saveAll(d){Object.keys(SK).forEach(function(k){if(d[k]!==undefined)sSave(k,d[k])})}
-function fightInfo(c){c=c||{};var its=c.its||[];if(!its.length&&!(c.fxs||[]).length)return null;return{n:its.length,rnd:c.rnd||1,onMap:its.filter(function(i){return i.pos}).length,fx:(c.fxs||[]).length}}
+function fightInfo(c){c=c||{};var its=c.its||[];var cells=Object.keys((c.map&&c.map.cells)||{}).length;if(!its.length&&!(c.fxs||[]).length&&!cells)return null;return{n:its.length,rnd:c.rnd||1,onMap:its.filter(function(i){return i.pos}).length,fx:(c.fxs||[]).length,cells:cells}}
+function fightTxt(fi){var a=[];if(fi.n)a.push("Round "+fi.rnd+" · "+fi.n+" combatant"+(fi.n===1?"":"s"));if(fi.onMap)a.push(fi.onMap+" on the map");if(fi.fx)a.push(fi.fx+(fi.fx===1?" effect":" effects"));if(fi.cells)a.push("scratch map ("+fi.cells+" squares drawn)");return a.join(" · ")}
 function getExportData(fight){var r=loadAll();var c=fight?cLoad():null;var out={campaign:(r.meta&&r.meta.campaign)||"Campaign",locations:r.locations||[],npcs:r.npcs||[],encounters:r.encounters||[],monsters:r.monsters||[],factions:r.factions||[],sessions:r.sessions||[],party:r.party||[],storyNodes:r.storyNodes||[],storyEdges:r.storyEdges||[]};if(c&&fightInfo(c))out.combat=c;return out}
 function doExport(filename,fight){
   var d=getExportData(fight);var j=JSON.stringify(d,null,2);var b=new Blob([j],{type:"application/json"});
@@ -715,7 +716,7 @@ function ExpMo(p){
     <div className="mo-hd"><h2>Export Campaign</h2><button className="tb-b" onClick={p.onClose}><IX/></button></div>
     <div className="mo-bd">
       <div className="exp-pre">Exporting <strong>{d.campaign}</strong> with {counts.join(", ")}.</div>
-      {fi&&<label style={{display:"flex",gap:8,alignItems:"flex-start",padding:"10px 12px",margin:"0 0 12px",border:"1px solid var(--bd)",borderRadius:8,background:"var(--acbg)",cursor:"pointer",fontSize:13}}><input type="checkbox" checked={incF} onChange={function(e){sIncF(e.target.checked)}} style={{marginTop:3}}/><span><strong>Include fight in progress</strong><br/><span style={{color:"var(--tx2)"}}>{"Round "+fi.rnd+" · "+fi.n+" combatants"+(fi.onMap?" · "+fi.onMap+" on the map":"")+(fi.fx?" · "+fi.fx+(fi.fx===1?" effect":" effects"):"")+". HP, initiative, turn, effects and battle map are saved."}</span></span></label>}
+      {fi&&<label style={{display:"flex",gap:8,alignItems:"flex-start",padding:"10px 12px",margin:"0 0 12px",border:"1px solid var(--bd)",borderRadius:8,background:"var(--acbg)",cursor:"pointer",fontSize:13}}><input type="checkbox" checked={incF} onChange={function(e){sIncF(e.target.checked)}} style={{marginTop:3}}/><span><strong>Include fight & scratch map</strong><br/><span style={{color:"var(--tx2)"}}>{fightTxt(fi)+". Maps drawn on an encounter are always included."}</span></span></label>}
       <div className="fld-l" style={{marginBottom:6}}>Filename</div>
       <div className="exp-fn"><input value={fn} onChange={function(e){sFn(e.target.value)}} onKeyDown={function(e){if(e.key==="Enter")doIt()}}/><span className="ext">.json</span></div>
       {window.showSaveFilePicker&&<div style={{marginTop:10,fontSize:12,color:"var(--tx2)"}}>Your browser supports choosing a save location.</div>}
@@ -738,7 +739,7 @@ function ImpMo(p){
   function parse(){sE(null);sOk(null);try{var q=JSON.parse(t);if(!q.locations&&!q.npcs&&!q.encounters&&!q.monsters&&!q.factions&&!q.storyNodes&&!q.sessions&&!q.party&&!q.storyEdges&&!q.combat){sE("JSON needs at least one entity array");return null}sPa(q);return q}catch(e){sE("Invalid JSON: "+e.message);return null}}
   var tFight=useMemo(function(){try{var q=JSON.parse(t);return q&&q.combat&&fightInfo(q.combat)?q.combat:null}catch(e){return null}},[t]);var tfi=tFight?fightInfo(tFight):null;
   function doReplace(){var q=pa||parse();if(!q)return;p.onImp(q);sOk(q.combat?"Replaced all data and restored the fight":"Replaced all data")}
-  function doFight(){if(!tFight)return;if(fightInfo(cLoad())&&!window.confirm("Replace the fight currently in the combat tracker?"))return;p.onFight(tFight);sOk("Fight restored: round "+tfi.rnd+", "+tfi.n+" combatants")}
+  function doFight(){if(!tFight)return;if(fightInfo(cLoad())&&!window.confirm("Replace the fight currently in the combat tracker?"))return;p.onFight(tFight);sOk("Restored: "+fightTxt(tfi))}
   function buildPrev(){var q=pa||parse();if(!q)return;sPa(q);var ms=[];var ni=[];var ch={};TYPES.concat(["storyNodes"]).forEach(function(tp){(q[tp]||[]).forEach(function(it){var ex=(p.data[tp]||[]).find(function(e){return e.name&&it.name&&e.name.toLowerCase().trim()===it.name.toLowerCase().trim()});var k=tp+":"+it.id;if(ex){ms.push({type:tp,incoming:it,existing:ex,key:k});ch[k]=true}else{ni.push({type:tp,item:it,key:k});ch[k]=true}})});sMp({ms:ms,ni:ni});sMc(ch)}
   function togCh(k){sMc(function(o){var n=Object.assign({},o);n[k]=!n[k];return n})}
   function doMerge(){if(!mp||!pa)return;p.onMerge(pa,mp.ms.filter(function(m){return mc[m.key]}),mp.ni.filter(function(n){return mc[n.key]}));sOk("Merged!");sMp(null)}
@@ -753,7 +754,7 @@ function ImpMo(p){
       {mp.ni.length>0&&<div className="mg-sec"><div className="mg-sec-t">New (add)</div>{mp.ni.map(function(n){return <div key={n.key} className="mg-it new-it"><input type="checkbox" checked={mc[n.key]||false} onChange={function(){togCh(n.key)}}/><label onClick={function(){togCh(n.key)}}><span className="mg-nb">new</span><span>{n.item.name||n.item.id}</span><span style={{color:"var(--tx2)",fontSize:11}}>({TYPE_LABELS[n.type]||n.type})</span></label></div>})}</div>}</>}
       {er&&<div className="err">{er}</div>}{ok&&<div className="okmsg">{ok}</div>}
     </div>
-    {tfi&&!mp&&<div style={{margin:"0 20px 12px",padding:"10px 12px",border:"1px solid var(--bd)",borderRadius:8,background:"var(--acbg)",fontSize:13,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}><span style={{flex:1,minWidth:180}}><strong>Fight in progress found</strong><br/><span style={{color:"var(--tx2)"}}>{"Round "+tfi.rnd+" · "+tfi.n+" combatants. Replace restores it too, or restore only the fight."}</span></span><button className="btn btn-s btn-sm" onClick={doFight}>Restore fight only</button></div>}
+    {tfi&&!mp&&<div style={{margin:"0 20px 12px",padding:"10px 12px",border:"1px solid var(--bd)",borderRadius:8,background:"var(--acbg)",fontSize:13,display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}><span style={{flex:1,minWidth:180}}><strong>Saved fight / scratch map found</strong><br/><span style={{color:"var(--tx2)"}}>{fightTxt(tfi)+". Replace restores it too, or restore only this."}</span></span><button className="btn btn-s btn-sm" onClick={doFight}>Restore fight only</button></div>}
     <div className="mo-ft">{mp?<><button className="btn btn-s" onClick={function(){sMp(null)}}>Back</button><button className="btn btn-p" onClick={doMerge}>Confirm Merge</button></>:<><button className="btn btn-s" onClick={p.onClose}>Cancel</button><button className="btn btn-d" onClick={doReplace} disabled={!t.trim()}>Replace</button><button className="btn btn-p" onClick={buildPrev} disabled={!t.trim()}>Merge</button></>}</div>
   </div></div>);
 }
@@ -848,7 +849,7 @@ function PartyView(p){
 }
 
 /* ═══ Battle Map ═══ */
-var TERR={wall:{f:"#3a3a48",o:1,l:"Wall"},diff:{f:"#a0743c",o:.45,l:"Difficult"},water:{f:"#4f86c6",o:.55,l:"Water"}};
+var TERR={wall:{f:"#3a3a48",o:1,l:"Wall"},diff:{f:"#a0743c",o:.45,l:"Difficult"},water:{f:"#4f86c6",o:.55,l:"Water"},plant:{f:"#3f8a3a",o:.6,l:"Plants"}};
 function BattleMap(p){
   var its=p.its||[],sIts=p.sIts;var encs=p.encounters||[];
   var src=p.mapId?encs.find(function(e){return e.id===p.mapId}):null;
@@ -883,7 +884,7 @@ function BattleMap(p){
   function up(){if(paint.current){paint.current=null;commit(mRef.current);return}if(meas&&meas.on){sMeas(Object.assign({},meas,{on:false}));return}if(drg){if(drg.moved)setPos(drg.id,drg.cur);sDrg(null)}}
   var W=m.w*cs,H=m.h*cs;var off=its.filter(function(i){return !i.pos});var activeId=its[p.act]?its[p.act].id:null;var selT=sel?its.find(function(i){return i.id===sel}):null;
   var gl=[];for(var x=0;x<=m.w;x++)gl.push("M"+x*cs+" 0V"+H);for(var y=0;y<=m.h;y++)gl.push("M0 "+y*cs+"H"+W);
-  var tools=[["move","Move"],["wall","Wall"],["diff","Difficult"],["water","Water"],["erase","Erase"],["measure","Measure"],["pan","Pan"]];
+  var tools=[["move","Move"],["wall","Wall"],["diff","Difficult"],["water","Water"],["plant","Plants"],["erase","Erase"],["measure","Measure"],["pan","Pan"]];
   return(<div className="bm">
     <div className="bm-bar">
       <select value={p.mapId||""} onChange={function(e){p.setMapId(e.target.value)}}><option value="">Scratch map</option>{encs.map(function(e){return <option key={e.id} value={e.id}>{"Map: "+(e.name||"Untitled")}</option>})}</select>
@@ -895,7 +896,7 @@ function BattleMap(p){
     <div className="bm-tray">{its.length===0?<span>Add combatants in the Combat panel, then place them here.</span>:off.length===0?<span>All combatants are on the map.</span>:<React.Fragment><span>Place:</span>{off.map(function(t){return <button key={t.id} className={"bm-chip"+(arm===t.id?" on":"")} onClick={function(){sArm(arm===t.id?null:t.id);sTool("move")}}>{t.name}</button>})}{arm&&<span style={{color:"var(--ac)"}}>Tap a square to place</span>}</React.Fragment>}</div>
     <div className="bm-wrap" ref={wrapR}>
       <svg ref={svgR} width={W} height={H} style={{touchAction:tool==="pan"?"auto":"none",cursor:tool==="pan"?"grab":tool==="move"?"pointer":"crosshair"}} onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
-        {Object.keys(m.cells||{}).map(function(k){var a=k.split(",");var t=TERR[m.cells[k]];if(!t)return null;return <rect key={k} x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/>})}
+        {Object.keys(m.cells||{}).map(function(k){var a=k.split(",");var t=TERR[m.cells[k]];if(!t)return null;if(m.cells[k]==="plant")return <g key={k}><rect x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/><circle cx={(+a[0]+.5)*cs} cy={(+a[1]+.5)*cs} r={cs*.22} fill="#2a6a28" opacity=".8"/></g>;return <rect key={k} x={a[0]*cs} y={a[1]*cs} width={cs} height={cs} fill={t.f} opacity={t.o}/>})}
         <path d={gl.join("")} stroke="rgba(60,40,20,.22)" strokeWidth="1" fill="none"/>
         {its.map(function(t){if(!t.pos)return null;var z=t.sz||1;var ps=drg&&drg.id===t.id?drg.cur:t.pos;var cx=(ps.x+z/2)*cs,cy=(ps.y+z/2)*cs,r=z*cs*.42;var dn=isDown(t);var fill=dn?"#8a8a8a":t.pc?"#2f5d8a":"#9b2c2c";var rr=t.hp!=null&&t.max?Math.max(0,Math.min(1,t.hp/t.max)):null;
           return <g key={t.id} opacity={dn?.5:1}>

@@ -578,7 +578,7 @@ function TrIt(p){
 
 /* ═══ Location Section (collapsible) ═══ */
 function LocSec(p){
-  var _o=useState(true);var o=_o[0];var sO=_o[1];
+  var _o=useState(false);var o=_o[0];var sO=_o[1];
   return(<div className="sb-sec">
     <div className={"sec-h"+(o?" open":"")} onClick={function(){sO(!o)}}><span className="ar"><IChev/></span><ILoc/><span>Locations</span><span className="bd">{p.locs?p.locs.length:0}</span></div>
     {o&&<><button className="sb-add" onClick={function(){p.addEnt("locations")}}><IPlus/> Add Location</button>
@@ -1125,6 +1125,7 @@ function App(){
   var _cFxs=useState(function(){return cLoad().fxs||[]});var cFxs=_cFxs[0];var sCFxs=_cFxs[1];
   var _cMap=useState(function(){return cLoad().map||{w:20,h:15,cells:{}}});var cMap=_cMap[0];var sCMap=_cMap[1];
   var _cMid=useState(function(){return cLoad().mapId||""});var cMid=_cMid[0];var sCMid=_cMid[1];
+  var _sesO=useState(false);var sesO=_sesO[0];var sSesO=_sesO[1];
   var _ask=useState(null);var askA=_ask[0];var sAskA=_ask[1];ASK.set=sAskA;
   var _cFm=useState(function(){return cLoad().fight||null});var cFm=_cFm[0];var sCFm=_cFm[1];
   useEffect(function(){try{localStorage.setItem("dmtk3:combat",JSON.stringify({its:cIts,rnd:cRnd,act:cAct,fxs:cFxs,map:cMap,mapId:cMid,fight:cFm}))}catch(e){}},[cIts,cRnd,cAct,cFxs,cMap,cMid,cFm]);
@@ -1251,11 +1252,11 @@ function App(){
         :<>
           <div className="st-flt"><input type="checkbox" id="flt" checked={flt} onChange={function(){sFlt(!flt)}}/><label htmlFor="flt">{flt?"Active Only":"Show All"}</label></div>
           <LocSec locs={da.locations} locTree={locTree} sl={sl} nav={nav} te={te} sTe={sTe} addEnt={addEnt} filter={flt}/>
-          <Sec title="NPCs" icon={<INpc/>} items={(da.npcs||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="npcs" sel={sl} onSel={nav} onAdd={function(){addEnt("npcs")}} defOpen={true} filter={flt}/>
-          <Sec title="Encounters" icon={<IEnc/>} items={da.encounters||[]} type="encounters" sel={sl} onSel={nav} onAdd={function(){addEnt("encounters")}} defOpen={true} filter={flt}/>
-          <Sec title="Monsters" icon={<IMon/>} items={(da.monsters||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="monsters" sel={sl} onSel={nav} onAdd={function(){addEnt("monsters")}} defOpen={true} filter={flt}/>
-          <Sec title="Factions" icon={<IFac/>} items={(da.factions||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="factions" sel={sl} onSel={nav} onAdd={function(){addEnt("factions")}} defOpen={true} filter={flt}/>
-          <div className="sb-sec"><div className="sec-h open" style={{cursor:"default"}}><span className="ar"><IChev/></span><IDoc/><span>Sessions</span><span className="bd">{da.sessions?da.sessions.length:0}</span></div><button className="sb-add" onClick={addSes}><IPlus/> New Session</button>{(da.sessions||[]).map(function(s){return <div key={s.id} className={"sb-it"+(sl.type==="sessions"&&sl.id===s.id?" act":"")} onClick={function(){nav("sessions",s.id)}}><span className="ic"><IDoc/></span><span className="nm">{s.title||s.date||"Untitled"}</span></div>})}</div>
+          <Sec title="NPCs" icon={<INpc/>} items={(da.npcs||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="npcs" sel={sl} onSel={nav} onAdd={function(){addEnt("npcs")}} filter={flt}/>
+          <Sec title="Encounters" icon={<IEnc/>} items={da.encounters||[]} type="encounters" sel={sl} onSel={nav} onAdd={function(){addEnt("encounters")}} filter={flt}/>
+          <Sec title="Monsters" icon={<IMon/>} items={(da.monsters||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="monsters" sel={sl} onSel={nav} onAdd={function(){addEnt("monsters")}} filter={flt}/>
+          <Sec title="Factions" icon={<IFac/>} items={(da.factions||[]).slice().sort(function(a,b){return(a.name||"").localeCompare(b.name||"")})} type="factions" sel={sl} onSel={nav} onAdd={function(){addEnt("factions")}} filter={flt}/>
+          <div className="sb-sec"><div className={"sec-h"+(sesO?" open":"")} onClick={function(){sSesO(!sesO)}}><span className="ar"><IChev/></span><IDoc/><span>Sessions</span><span className="bd">{da.sessions?da.sessions.length:0}</span></div>{sesO&&<><button className="sb-add" onClick={addSes}><IPlus/> New Session</button>{(da.sessions||[]).map(function(s){return <div key={s.id} className={"sb-it"+(sl.type==="sessions"&&sl.id===s.id?" act":"")} onClick={function(){nav("sessions",s.id)}}><span className="ic"><IDoc/></span><span className="nm">{s.title||s.date||"Untitled"}</span></div>})}</>}</div>
         </>}
       </div>
     </div>
